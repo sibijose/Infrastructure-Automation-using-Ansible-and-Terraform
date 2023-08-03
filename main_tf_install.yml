@@ -1,0 +1,67 @@
+cat main.yml 
+---
+- name: "Terraform installation-play"
+  hosts: localhost
+  become: yes
+  vars:
+    wget_url: "https://releases.hashicorp.com/terraform/1.5.2/terraform_1.5.2_linux_amd64.zip"
+  tasks:
+    - name: "Downloading terraform binaries"
+      get_url:
+        url: "{{ wget_url }}"
+        dest: "/tmp/terraform.zip"
+ 
+    - name: "Terraform - Extracting Terraform Archive"
+      unarchive:
+        src: "/tmp/terraform.zip"
+        dest: "/tmp/"
+        remote_src: true   
+ 
+    - name: "Move Terraform binary to /usr/bin "
+      copy:
+        src: "/tmp/terraform"
+        dest: "/usr/local/bin"
+        remote_src: true
+ 
+    - name: Add execute permissions
+      file:
+        path: /usr/local/bin/terraform
+        mode: "+x"
+      become: yes
+ 
+    - name: "Post-Installation - CleanUp"
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "/tmp/terraform.zip"
+ 
+=======================================================
+ 
+PLAY [Terraform installation-play] *********************************************************************
+ 
+TASK [Downloading terraform binaries] ********************************************************************
+changed: [localhost]
+ 
+TASK [Terraform - Extracting Terraform Archive] ****************************************************************
+changed: [localhost]
+ 
+TASK [Move Terraform binary to /usr/bin] *******************************************************************
+changed: [localhost]
+ 
+TASK [Add execute permissions] *********************************************************************
+changed: [localhost]
+ 
+TASK [Post-Installation - CleanUp] *********************************************************************
+changed: [localhost] => (item=/tmp/terraform.zip)
+ 
+PLAY RECAP *****************************************************************************
+localhost                  : ok=5    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+ 
+[ec2-user@ip-172-31-12-63 ~]$ terraform version
+Terraform v1.5.2
+on linux_amd64
+[ec2-user@ip-172-31-12-63 ~]$ terraform version
+Terraform v1.5.2
+on linux_amd64
+ 
